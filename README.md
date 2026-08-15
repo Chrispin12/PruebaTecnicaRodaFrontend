@@ -5,8 +5,11 @@ solicitud de crédito.
 
 Prueba técnica — vacante Full Stack Developer (Roda).
 
+**Aplicación en producción:** [https://prueba-tecnica-roda-frontend.vercel.app](https://prueba-tecnica-roda-frontend.vercel.app)
+
 La API vive en un repositorio aparte:
-[PruebaTecnicaRodaBackend](https://github.com/Chrispin12/PruebaTecnicaRodaBackend).
+[PruebaTecnicaRodaBackend](https://github.com/Chrispin12/PruebaTecnicaRodaBackend)
+([Cloud Run](https://roda-credit-api-446921260054.us-central1.run.app)).
 
 **Este cliente no calcula nada financiero.** Cuota, intereses, valor financiado, totales, tasas
 y tabla de amortización los calcula el backend. Aquí se capturan datos, se valida la
@@ -169,19 +172,42 @@ confirmación) y errores 400/422/500.
 
 ---
 
-## Despliegue (Vercel)
+## Despliegue en Vercel (producción)
 
-1. Importar este repositorio en [Vercel](https://vercel.com).
-2. Root Directory: vacío (este repo **es** el frontend).
-3. Framework: Vite (`vercel.json`).
-4. Environment Variable **Production:** `VITE_API_URL` = URL pública de Cloud Run
-   (`https://….run.app`, sin barra final).
-5. Deploy.
+**URL pública:** [https://prueba-tecnica-roda-frontend.vercel.app](https://prueba-tecnica-roda-frontend.vercel.app)
 
-Después, poner `https://tu-app.vercel.app` en `CORS_ALLOW_ORIGINS` del backend y redesplegar
-la API.
+El frontend es un build estático de Vite. Vercel lo sirve por CDN. `VITE_API_URL` se **incrusta
+en el build**: si falta, la aplicación lanza un error al arrancar (pantalla en blanco). Hay
+que definirla **antes** de construir y **volver a desplegar** si cambia la URL de la API.
 
-Orden: Cloud SQL → migraciones → Cloud Run → esta variable → Vercel → CORS.
+### Cómo está configurado este proyecto
+
+| Ajuste | Valor |
+| --- | --- |
+| Repositorio | [Chrispin12/PruebaTecnicaRodaFrontend](https://github.com/Chrispin12/PruebaTecnicaRodaFrontend) |
+| Root Directory | *(vacío: este repo es el frontend)* |
+| Framework | Vite (`vercel.json`) |
+| Variable `VITE_API_URL` | `https://roda-credit-api-446921260054.us-central1.run.app` |
+
+### Cómo repetir el despliegue
+
+1. Importar el repositorio en [Vercel](https://vercel.com).
+2. **Settings → Environment Variables** → Production:
+   - Nombre: `VITE_API_URL`
+   - Valor: URL de Cloud Run **sin barra final**.
+3. Deploy (o Redeploy **sin** caché de build si la variable se añadió después).
+4. El origen `https://prueba-tecnica-roda-frontend.vercel.app` debe estar en
+   `CORS_ALLOW_ORIGINS` del backend (ya configurado en Cloud Run).
+
+Orden correcto: Cloud SQL → migraciones Alembic → Cloud Run → `VITE_API_URL` → Vercel → CORS.
+
+### Comprobar
+
+1. La UI carga (hero + simulador).
+2. Calcular cuota llama a `POST …/api/v1/simulations`.
+3. Solicitar crédito llama a `POST …/api/v1/credit-applications` y muestra un UUID.
+
+Informe completo de la prueba: [`INFORME_TECNICO.md`](./INFORME_TECNICO.md).
 
 ---
 
