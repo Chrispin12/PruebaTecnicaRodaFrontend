@@ -46,6 +46,37 @@ function describedBy(id: string, hint?: string, error?: string): string | undefi
   return undefined
 }
 
+interface SelectFieldProps extends Omit<ComponentPropsWithRef<'select'>, 'id' | 'className'> {
+  id: string
+  label: string
+  hint?: string
+  error?: string
+  children: ReactNode
+}
+
+export function SelectField({
+  id,
+  label,
+  hint,
+  error,
+  children,
+  ...props
+}: SelectFieldProps) {
+  return (
+    <FieldLayout id={id} label={label} hint={hint} error={error}>
+      <select
+        id={id}
+        aria-invalid={Boolean(error)}
+        aria-describedby={describedBy(id, hint, error)}
+        className={`${CONTROL_CLASSES} text-sm`}
+        {...props}
+      >
+        {children}
+      </select>
+    </FieldLayout>
+  )
+}
+
 interface TextFieldProps extends Omit<ComponentPropsWithRef<'input'>, 'id' | 'className'> {
   id: string
   label: string

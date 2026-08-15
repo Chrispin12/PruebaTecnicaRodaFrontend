@@ -42,9 +42,13 @@ export interface SimulationResponse {
   schedule: AmortizationInstallment[]
 }
 
+export type DocumentType = 'cc' | 'ce' | 'passport'
+
 export interface Applicant {
   first_name: string
   last_name: string
+  document_type: DocumentType
+  document_number: string
   email: string
   phone: string
   city: string
@@ -56,6 +60,7 @@ export type CreditApplicationRequest = Applicant & SimulationRequest
 export type CreditApplicationResponse = Applicant &
   Omit<SimulationResponse, 'schedule'> & {
     id: string
+    customer_id: string
     created_at: string
   }
 

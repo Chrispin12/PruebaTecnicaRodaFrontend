@@ -29,6 +29,7 @@ async function simulate(user: UserEvent) {
 async function fillApplicant(user: UserEvent) {
   await user.type(screen.getByLabelText('Nombre'), 'Laura')
   await user.type(screen.getByLabelText('Apellido'), 'Gomez')
+  await user.type(screen.getByLabelText('Número de documento'), '1023456789')
   await user.type(screen.getByLabelText('Correo electrónico'), 'laura.gomez@example.com')
   await user.type(screen.getByLabelText('Teléfono'), '3001234567')
   await user.type(screen.getByLabelText('Ciudad'), 'Bogota')
@@ -184,7 +185,7 @@ describe('CreditSimulatorPage', () => {
     await simulate(user)
     await user.click(screen.getByRole('button', { name: APPLY_BUTTON }))
 
-    expect(screen.queryByLabelText(/documento/i)).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Número de documento')).toBeInTheDocument()
     expect(screen.queryByLabelText(/contrasena/i)).not.toBeInTheDocument()
 
     await fillApplicant(user)
@@ -196,6 +197,8 @@ describe('CreditSimulatorPage', () => {
     expect(requests[0]).toEqual({
       first_name: 'Laura',
       last_name: 'Gomez',
+      document_type: 'cc',
+      document_number: '1023456789',
       email: 'laura.gomez@example.com',
       phone: '3001234567',
       city: 'Bogota',
@@ -233,6 +236,7 @@ describe('CreditSimulatorPage', () => {
     await user.click(screen.getByRole('button', { name: SUBMIT_APPLICATION_BUTTON }))
 
     expect(await screen.findByText('Ingresa tu nombre.')).toBeInTheDocument()
+    expect(screen.getByText('Ingresa tu número de documento.')).toBeInTheDocument()
     expect(screen.getByText('Ingresa tu apellido.')).toBeInTheDocument()
     expect(screen.getByText('Ingresa un correo electrónico válido.')).toBeInTheDocument()
     expect(

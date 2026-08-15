@@ -64,9 +64,12 @@ export const simulationResponse: SimulationResponse = {
 
 export const creditApplicationResponse: CreditApplicationResponse = {
   id: '3f6d1a2e-8c4b-4f0a-9d3e-5b7c1f8a2d90',
+  customer_id: '7a1c2b3d-4e5f-6789-abcd-ef0123456789',
   created_at: '2026-08-14T17:05:12.482913Z',
   first_name: 'Laura',
   last_name: 'Gomez',
+  document_type: 'cc',
+  document_number: '1023456789',
   email: 'laura.gomez@example.com',
   phone: '3001234567',
   city: 'Bogota',

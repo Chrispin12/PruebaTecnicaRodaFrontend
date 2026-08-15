@@ -207,8 +207,6 @@ Orden correcto: Cloud SQL → migraciones Alembic → Cloud Run → `VITE_API_UR
 2. Calcular cuota llama a `POST …/api/v1/simulations`.
 3. Solicitar crédito llama a `POST …/api/v1/credit-applications` y muestra un UUID.
 
-Informe completo de la prueba: [`INFORME_TECNICO.md`](./INFORME_TECNICO.md).
-
 ---
 
 ## Fuera de alcance

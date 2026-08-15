@@ -1,12 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Mail, MapPin, Phone, ShieldCheck, User } from 'lucide-react'
+import { IdCard, Mail, MapPin, Phone, ShieldCheck, User } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { Button } from '../../components/Button'
 import { Card } from '../../components/Card'
 import { ErrorMessage } from '../../components/ErrorMessage'
-import { TextField } from '../../components/Field'
+import { SelectField, TextField } from '../../components/Field'
 import {
   CREDIT_APPLICATION_FORM_DEFAULTS,
   CREDIT_APPLICATION_FORM_FIELDS,
@@ -83,6 +83,28 @@ export function CreditApplicationForm({
               autoComplete="family-name"
               error={errors.last_name?.message}
               {...register('last_name')}
+            />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <SelectField
+              id="document_type"
+              label="Tipo de documento"
+              error={errors.document_type?.message}
+              {...register('document_type')}
+            >
+              <option value="cc">Cédula de ciudadanía</option>
+              <option value="ce">Cédula de extranjería</option>
+              <option value="passport">Pasaporte</option>
+            </SelectField>
+            <TextField
+              id="document_number"
+              label="Número de documento"
+              icon={IdCard}
+              inputMode="numeric"
+              autoComplete="off"
+              hint="Sin puntos ni espacios."
+              error={errors.document_number?.message}
+              {...register('document_number')}
             />
           </div>
         </fieldset>

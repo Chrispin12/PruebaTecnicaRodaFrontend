@@ -13,6 +13,10 @@ interface ApplicationSuccessProps {
 export function ApplicationSuccess({ application, onSimulateAgain }: ApplicationSuccessProps) {
   const rows: { label: string; value: string; mono?: boolean }[] = [
     { label: 'Número de solicitud', value: application.id, mono: true },
+    {
+      label: 'Documento',
+      value: `${application.document_type.toUpperCase()} ${application.document_number}`,
+    },
     { label: 'Fecha de registro', value: formatDateTime(application.created_at) },
     { label: 'Cuota mensual registrada', value: formatCop(application.monthly_payment) },
   ]
