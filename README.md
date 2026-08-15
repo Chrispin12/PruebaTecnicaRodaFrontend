@@ -1,0 +1,197 @@
+# Roda — Simulador de crédito (frontend)
+
+Interfaz web para simular la financiación de una bicicleta o moto eléctrica y registrar la
+solicitud de crédito.
+
+Prueba técnica — vacante Full Stack Developer (Roda).
+
+La API vive en un repositorio aparte:
+[PruebaTecnicaRodaBackend](https://github.com/Chrispin12/PruebaTecnicaRodaBackend).
+
+**Este cliente no calcula nada financiero.** Cuota, intereses, valor financiado, totales, tasas
+y tabla de amortización los calcula el backend. Aquí se capturan datos, se valida la
+estructura, se llama a la API y se muestra la respuesta.
+
+---
+
+## Qué puede hacer el usuario
+
+1. Elegir un **modelo de ejemplo** (3 bicicletas y 3 motos, con precio, inicial mínima y plazo)
+   o escribir valores propios.
+2. Ajustar **plazo** y **cuota inicial** (si hay modelo elegido, la inicial no puede bajar del
+   mínimo; puede marcar *Deseo proceder sin cuota inicial* para simular con $0).
+3. Ver el **resumen** (cuota mensual como dato principal) y la **tabla de amortización**.
+4. **Solicitar crédito** solo después de una simulación exitosa (nombre, apellido, correo,
+   teléfono, ciudad).
+5. Ver la **confirmación** con id, fecha y cuota registrada.
+
+---
+
+## Stack
+
+| Herramienta | Para qué |
+| --- | --- |
+| React 19 + TypeScript | UI y contrato de la API |
+| Vite 8 | Desarrollo y build |
+| Tailwind CSS 4 | Estilos (`@theme` en CSS, sin `tailwind.config.js`) |
+| TanStack Query | `useMutation` (simular y registrar) |
+| React Hook Form + Zod | Formularios y validación estructural |
+| `fetch` | HTTP. Dos POST JSON: no hace falta Axios |
+| lucide-react | Iconos (bici, moto, etc.) |
+| Vitest + Testing Library + MSW | Tests con la red interceptada |
+| oxlint + Prettier | Lint y formato |
+
+---
+
+## Cómo ejecutar
+
+Requisitos: Node 20+ y la API en marcha (`http://localhost:8000` con Docker Compose en el
+repo del backend).
+
+```bash
+copy .env.example .env
+npm install
+npm run dev
+```
+
+Abre http://localhost:5173.
+
+El backend debe permitir CORS desde `http://localhost:5173` (`CORS_ALLOW_ORIGINS`).
+
+### Variables de entorno
+
+| Variable | Obligatoria | Descripción |
+| --- | --- | --- |
+| `VITE_API_URL` | Sí en producción | URL base de la API, **sin barra final**. Local: `http://localhost:8000` |
+
+En desarrollo, si falta, se usa `http://localhost:8000`. En un build de producción su ausencia
+lanza un error al arrancar: mejor fallar a vista que apuntar en silencio a localhost.
+
+No hay secretos en el frontend. Todo lo que entra al bundle es público.
+
+### Scripts
+
+| Comando | Qué hace |
+| --- | --- |
+| `npm run dev` | Vite con recarga |
+| `npm run build` | `tsc -b` + bundle en `dist/` |
+| `npm run preview` | Sirve el bundle |
+| `npm test` | Vitest una vez |
+| `npm run lint` | oxlint |
+| `npm run format` / `format:check` | Prettier |
+| `npm run typecheck` | Solo tipos |
+
+---
+
+## Arquitectura
+
+```
+src/
+├── app/            Cabecera, hero, página que orquesta el flujo
+├── components/     UI reutilizable (botón, card, campos). Sin dominio
+├── features/
+│   ├── simulation/          Formulario, catálogo, resumen, amortización
+│   └── credit-application/  Solicitud y confirmación
+├── schemas/        Zod + adaptación al contrato de la API
+├── services/api/   Único lugar que hace HTTP
+├── types/          Contrato del backend (importes como `string`)
+├── utils/          Formato COP y mapeo de errores de API
+└── test/           Fixtures MSW y helpers
+```
+
+```
+Formulario (RHF + Zod) → useMutation → services/api → backend
+                                              ↓
+                   estado local de la página ← respuesta tipada
+```
+
+- Ningún componente hace `fetch` directo.
+- El flujo (`simulation`, `application`) vive en `useState` de la página. No hay Redux ni
+  Zustand: son dos datos de una sola pantalla.
+- Zod valida estructura (obligatorio, dígitos, email, teléfono). Los límites de negocio
+  (mínimo $500.000, etc.) los aplica el backend.
+- El catálogo de modelos es **solo frontend** (atajos de UX). No es inventario de Roda.
+
+---
+
+## Endpoints que consume
+
+| Método | Ruta | Cuándo |
+| --- | --- | --- |
+| `POST` | `/api/v1/simulations` | Calcular plan |
+| `POST` | `/api/v1/credit-applications` | Registrar solicitud |
+
+Nunca envía `monthly_payment`, `financed_amount`, tasas ni totales. El backend los rechazaría
+(`extra="forbid"`) y los recalcula al persistir.
+
+---
+
+## Decisiones técnicas
+
+**Importes como texto.** El backend manda `"310395.84"`. Pasarlo a `number` introduce float
+sin ganancia: aquí no se opera, solo se formatea (`$310.395,84`) en `utils/format.ts`.
+
+**Catálogo.** Seis modelos de demostración. Al elegir uno se rellenan tipo, precio, inicial
+mínima y plazo. El usuario puede **subir** la inicial y **cambiar** el plazo. Si escribe por
+debajo del mínimo, aparece alerta (`La cuota inicial mínima de este vehículo es $400.000.`).
+La casilla *Deseo proceder sin cuota inicial* envía `down_payment: "0"` sin teclear cero.
+
+**Radios en vez de `<select>`** para tipo y plazo: pocas opciones, se ven todas.
+
+**TanStack Query solo en mutaciones.** No hay listados que cachear. `retry: false` en POST de
+solicitud para no duplicar registros.
+
+**Errores**
+
+| HTTP | UI |
+| --- | --- |
+| 400 | Mensaje del backend |
+| 422 | Por campo si coincide; si no, aviso general |
+| 5xx / red | «No fue posible procesar la solicitud. Intenta nuevamente.» |
+
+Nunca se pinta HTML de la API (`dangerouslySetInnerHTML` no se usa).
+
+**Visual.** Paleta `brand-*` propia (no copiada de Roda). Cuota mensual a tamaño dominante.
+Animaciones solo de entrada y con `motion-safe:`.
+
+**Accesibilidad.** Labels, `aria-invalid`, `role="alert"` / `status`, foco visible, tabla con
+scroll horizontal en móvil.
+
+---
+
+## Tests
+
+`npm test` (Vitest + MSW). Las peticiones se interceptan en red, no mockeando el módulo HTTP.
+
+Cubre render del formulario, catálogo, mínimo de inicial, casilla sin cuota inicial, envío
+correcto, loading, doble submit, flujo de página (vacío → resultado → solicitud →
+confirmación) y errores 400/422/500.
+
+---
+
+## Despliegue (Vercel)
+
+1. Importar este repositorio en [Vercel](https://vercel.com).
+2. Root Directory: vacío (este repo **es** el frontend).
+3. Framework: Vite (`vercel.json`).
+4. Environment Variable **Production:** `VITE_API_URL` = URL pública de Cloud Run
+   (`https://….run.app`, sin barra final).
+5. Deploy.
+
+Después, poner `https://tu-app.vercel.app` en `CORS_ALLOW_ORIGINS` del backend y redesplegar
+la API.
+
+Orden: Cloud SQL → migraciones → Cloud Run → esta variable → Vercel → CORS.
+
+---
+
+## Fuera de alcance
+
+Login, JWT, documento de identidad. El cálculo financiero no se replica aquí.
+
+---
+
+## Licencia / contexto
+
+Código de prueba técnica. Los modelos de ejemplo y la tasa de la API no representan el
+catálogo ni las condiciones comerciales reales de Roda.

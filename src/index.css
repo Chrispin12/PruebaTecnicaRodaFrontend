@@ -1,0 +1,63 @@
+@import 'tailwindcss';
+
+/* Tailwind v4 se configura desde CSS, no con tailwind.config.js.
+   Se declaran solo los tokens que la interfaz usa de verdad: la paleta de marca y dos
+   animaciones de entrada. El resto (neutros, espaciado, radios, sombras) sale de la escala por
+   defecto de Tailwind, que ya es consistente. */
+@theme {
+  /* Verde electrico propio de esta prueba: sostenibilidad y tecnologia, sin replicar la paleta
+     de Roda. `brand-700` es el tono minimo que mantiene 4.5:1 con texto blanco encima, asi que
+     es el de los botones; los tonos claros (300/400) se usan sobre superficies oscuras. */
+  --color-brand-50: oklch(0.97 0.03 165);
+  --color-brand-100: oklch(0.94 0.06 165);
+  --color-brand-200: oklch(0.88 0.1 165);
+  --color-brand-300: oklch(0.8 0.13 165);
+  --color-brand-400: oklch(0.72 0.15 165);
+  --color-brand-500: oklch(0.64 0.15 165);
+  --color-brand-600: oklch(0.55 0.13 165);
+  --color-brand-700: oklch(0.46 0.11 166);
+  --color-brand-800: oklch(0.38 0.09 167);
+  --color-brand-900: oklch(0.31 0.07 168);
+  --color-brand-950: oklch(0.2 0.05 170);
+
+  /* Entrada de contenido que aparece tras una respuesta del servidor. Se aplican siempre con
+     la variante `motion-safe:`, de modo que quien pida menos movimiento no vea ninguno. */
+  --animate-rise: rise 0.35s cubic-bezier(0.2, 0, 0, 1) both;
+  --animate-pop: pop 0.3s cubic-bezier(0.2, 0, 0, 1) both;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(0.75rem);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: scale(0.92);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  @apply bg-white text-slate-900 antialiased;
+}
