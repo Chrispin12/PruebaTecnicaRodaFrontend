@@ -24,9 +24,10 @@ estructura, se llama a la API y se muestra la respuesta.
 2. Ajustar **plazo** y **cuota inicial** (si hay modelo elegido, la inicial no puede bajar del
    mínimo; puede marcar *Deseo proceder sin cuota inicial* para simular con $0).
 3. Ver el **resumen** (cuota mensual como dato principal) y la **tabla de amortización**.
-4. **Solicitar crédito** solo después de una simulación exitosa (nombre, apellido, correo,
-   teléfono, ciudad).
-5. Ver la **confirmación** con id, fecha y cuota registrada.
+4. **Solicitar crédito** solo después de una simulación exitosa (nombre, apellido, tipo y
+   número de documento, correo, teléfono, ciudad). La API identifica al cliente por la cédula:
+   varios créditos, el correo puede cambiar; no hay login.
+5. Ver la **confirmación** con id, documento, fecha y cuota registrada.
 
 ---
 
@@ -211,7 +212,7 @@ Orden correcto: Cloud SQL → migraciones Alembic → Cloud Run → `VITE_API_UR
 
 ## Fuera de alcance
 
-Login, JWT, documento de identidad. El cálculo financiero no se replica aquí.
+Login, JWT, verificación KYC. El cálculo financiero no se replica aquí.
 
 ---
 
